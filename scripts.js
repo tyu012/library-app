@@ -37,6 +37,27 @@ Book.prototype.infoAsList = function() {
     readListItem.textContent = this.read ? "Read" : "Not read";
     bookInfoList.appendChild(readListItem);
 
+    let toggleReadUnreadItem = document.createElement("li");
+    let toggleReadUnreadButton = document.createElement("button");
+    toggleReadUnreadButton.textContent = "Read/Unread";
+    toggleReadUnreadButton.addEventListener("click", () => {
+        this.read = !this.read;
+        refresh();
+    });
+    toggleReadUnreadItem.appendChild(toggleReadUnreadButton);
+    bookInfoList.appendChild(toggleReadUnreadItem);
+
+    let deleteBookItem = document.createElement("li");
+    let deleteBookButton = document.createElement("button");
+    deleteBookButton.textContent = "Delete Book";
+    deleteBookButton.addEventListener("click", () => {
+        console.log("Deleted book: " + this.infoAsString());
+        myLibrary.splice(myLibrary.indexOf(this), 1);
+        refresh();
+    });
+    deleteBookItem.appendChild(deleteBookButton);
+    bookInfoList.appendChild(deleteBookItem);
+
     bookInfoList.classList.add("book-info-list");
 
     return bookInfoList;
@@ -120,6 +141,7 @@ BookForm.prototype.appendWithID = function(stringWithoutUniqueID) {
 
 
 function addBookToLibrary(book, library) {
+    console.log("Added book: " + book.infoAsString());
     library.push(book);
     refresh();
 }
@@ -130,7 +152,6 @@ function createBookListElementFromArray(bookArray) {
 
     for (let i = 0; i < bookArray.length; i++) {
         let book = bookArray[i];
-        console.log("Added book: " + book.infoAsString());
         let bookInfoList = book.infoAsList();
         bookInfoList.setAttribute("data-book-index", i);
         bookList.appendChild(bookInfoList);
@@ -182,6 +203,11 @@ function testFormCreation() {
 
 // Code executed on load
 newBookButton.addEventListener("click", () => {
+    if (document.querySelector("form")) {
+        console.log("A form is already present");
+        return;
+    }
+
     bookDisplay.appendChild(new BookForm(numberOfFormsCreated).form);
     numberOfFormsCreated++;
 })
