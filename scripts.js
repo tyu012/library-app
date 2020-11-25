@@ -62,6 +62,12 @@ BookForm.prototype.createForm = function() {
     submitButton.value = "Submit";
     form.appendChild(submitButton);
 
+    form.addEventListener("submit", e => {
+        e.preventDefault();
+        console.log("Submitted");
+        this.submitForm();
+    })
+
     this.form = form;
 }
 
@@ -83,6 +89,17 @@ BookForm.prototype.createField = function(type, labelText, name) {
     field.appendChild(document.createElement("br"));
 
     return field;
+}
+
+BookForm.prototype.submitForm = function() {
+    const formData = new FormData(this.form);
+    const title = formData.get("book-form-title");
+    const author = formData.get("book-form-author");
+    const pages = parseInt(formData.get("book-form-pages"));
+    const read = formData.get("book-form-read") === "on" ? true : false;
+    
+    let newBook = new Book(title, author, pages, read);
+    console.log(newBook);
 }
 
 
