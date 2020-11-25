@@ -128,10 +128,13 @@ function addBookToLibrary(book, library) {
 function createBookListElementFromArray(bookArray) {
     let bookList = document.createElement("div");
 
-    bookArray.forEach(book => {
-        console.log(book);
-        bookList.appendChild(book.infoAsList());
-    })
+    for (let i = 0; i < bookArray.length; i++) {
+        let book = bookArray[i];
+        console.log("Added book: " + book.infoAsString());
+        let bookInfoList = book.infoAsList();
+        bookInfoList.setAttribute("data-book-index", i);
+        bookList.appendChild(bookInfoList);
+    }
 
     bookList.classList.add("book-list");
 
