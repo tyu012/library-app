@@ -52,6 +52,7 @@ function BookForm(id) {
 
 BookForm.prototype.createForm = function() {
     let form = document.createElement("form");
+    form.id = this.appendWithID("form");
 
     form.appendChild(this.createField("text", "Title: ", this.appendWithID("book-form-title")));
     form.appendChild(this.createField("text", "Author: ", this.appendWithID("book-form-author")));
