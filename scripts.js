@@ -182,6 +182,7 @@ function removeForm(id) {
 
 
 
+// Functions for testing functionality of the app
 function testLibrary() {
     for (let i = 0; i < 5; i++) {
         let newBook = new Book("Title", "Author", 250, false);
