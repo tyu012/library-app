@@ -1,6 +1,7 @@
 let myLibrary = [];
 let bookDisplay = document.querySelector("#content");
 let newBookButton = document.querySelector("#new-book");
+let numberOfFormsCreated = 0;
 
 
 
@@ -44,21 +45,22 @@ Book.prototype.infoAsList = function() {
 
 
 
-function BookForm() {
+function BookForm(id) {
+    this.id = id;
     this.createForm();
 }
 
 BookForm.prototype.createForm = function() {
     let form = document.createElement("form");
 
-    form.appendChild(this.createField("text", "Title: ", "book-form-title"));
-    form.appendChild(this.createField("text", "Author: ", "book-form-author"));
-    form.appendChild(this.createField("text", "Pages: ", "book-form-pages"));
-    form.appendChild(this.createField("checkbox", "I have read this book: ", "book-form-read"));
+    form.appendChild(this.createField("text", "Title: ", this.appendWithID("book-form-title")));
+    form.appendChild(this.createField("text", "Author: ", this.appendWithID("book-form-author")));
+    form.appendChild(this.createField("text", "Pages: ", this.appendWithID("book-form-pages")));
+    form.appendChild(this.createField("checkbox", "I have read this book: ", this.appendWithID("book-form-read")));
     
     let submitButton = document.createElement("input");
     submitButton.type = "submit";
-    submitButton.id = "book-form-submit";
+    submitButton.id = "book-form-submit-" + this.id;
     submitButton.value = "Submit";
     form.appendChild(submitButton);
 
@@ -67,6 +69,9 @@ BookForm.prototype.createForm = function() {
         console.log("Submitted");
         this.submitForm();
     })
+    
+    let cancelButton = document.createElement("button");
+    cancelButton.textContent = "Cancel";
 
     this.form = form;
 }
@@ -93,13 +98,17 @@ BookForm.prototype.createField = function(type, labelText, name) {
 
 BookForm.prototype.submitForm = function() {
     const formData = new FormData(this.form);
-    const title = formData.get("book-form-title");
-    const author = formData.get("book-form-author");
-    const pages = parseInt(formData.get("book-form-pages"));
-    const read = formData.get("book-form-read") === "on" ? true : false;
+    const title = formData.get(this.appendWithID("book-form-title"));
+    const author = formData.get(this.appendWithID("book-form-author"));
+    const pages = parseInt(formData.get(this.appendWithID("book-form-pages")));
+    const read = formData.get(this.appendWithID("book-form-read")) === "on" ? true : false;
     
     let newBook = new Book(title, author, pages, read);
     console.log(newBook);
+}
+
+BookForm.prototype.appendWithID = function(stringWithoutUniqueID) {
+    return stringWithoutUniqueID + "-" + this.id;
 }
 
 
@@ -146,5 +155,6 @@ function testFormCreation() {
 testLibrary();
 
 newBookButton.addEventListener("click", () => {
-    bookDisplay.appendChild(new BookForm().form);
+    bookDisplay.appendChild(new BookForm(numberOfFormsCreated).form);
+    numberOfFormsCreated++;
 })
