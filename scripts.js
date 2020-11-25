@@ -125,5 +125,9 @@ function testFormCreation() {
 
 
 
+// Code executed on load
 testLibrary();
-testFormCreation();
+
+newBookButton.addEventListener("click", () => {
+    bookDisplay.appendChild(new BookForm().form);
+})
