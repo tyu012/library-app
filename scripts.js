@@ -69,6 +69,7 @@ BookForm.prototype.createForm = function() {
         e.preventDefault();
         console.log("Submitted");
         this.submitForm();
+        addBookToLibrary(this.book, myLibrary);
     })
     
     let cancelButton = document.createElement("button");
@@ -103,9 +104,12 @@ BookForm.prototype.submitForm = function() {
     const author = formData.get(this.appendWithID("book-form-author"));
     const pages = parseInt(formData.get(this.appendWithID("book-form-pages")));
     const read = formData.get(this.appendWithID("book-form-read")) === "on" ? true : false;
+
+    removeForm(this.form.id);
     
     let newBook = new Book(title, author, pages, read);
     console.log(newBook);
+    this.book = newBook;
 }
 
 BookForm.prototype.appendWithID = function(stringWithoutUniqueID) {
@@ -117,6 +121,7 @@ BookForm.prototype.appendWithID = function(stringWithoutUniqueID) {
 
 function addBookToLibrary(book, library) {
     library.push(book);
+    refresh();
 }
 
 
@@ -132,6 +137,26 @@ function createBookListElementFromArray(bookArray) {
 
     return bookList;
 }
+
+// Not efficient, overwrites the book display whenever the function is called
+function refresh() {
+    overwriteBookDisplay();
+}
+
+function overwriteBookDisplay() {
+    if (document.querySelector(".book-list")) {
+        bookDisplay.replaceChild(createBookListElementFromArray(myLibrary), bookDisplay.querySelector(".book-list"));
+    } else {
+        bookDisplay.appendChild(createBookListElementFromArray(myLibrary));
+    }
+}
+
+function removeForm(id) {
+    bookDisplay.removeChild(document.querySelector("#" + id));
+}
+
+
+
 
 function testLibrary() {
     for (let i = 0; i < 5; i++) {
@@ -153,8 +178,6 @@ function testFormCreation() {
 
 
 // Code executed on load
-testLibrary();
-
 newBookButton.addEventListener("click", () => {
     bookDisplay.appendChild(new BookForm(numberOfFormsCreated).form);
     numberOfFormsCreated++;
