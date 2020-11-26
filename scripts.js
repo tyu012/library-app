@@ -146,15 +146,16 @@ function addBookToLibrary(book, library) {
     refresh();
 }
 
-
 function createBookListElementFromArray(bookArray) {
     let bookList = document.createElement("div");
 
-    for (let i = 0; i < bookArray.length; i++) {
-        let book = bookArray[i];
-        let bookInfoList = book.infoAsList();
-        bookInfoList.setAttribute("data-book-index", i);
-        bookList.appendChild(bookInfoList);
+    if (bookArray.length !== 0) {
+        for (let i = 0; i < bookArray.length; i++) {
+            let book = bookArray[i];
+            let bookInfoList = book.infoAsList();
+            bookInfoList.setAttribute("data-book-index", i);
+            bookList.appendChild(bookInfoList);
+        }
     }
 
     bookList.classList.add("book-list");
@@ -165,6 +166,7 @@ function createBookListElementFromArray(bookArray) {
 // Not efficient, overwrites the book display whenever the function is called
 function refresh() {
     overwriteBookDisplay();
+    saveToLocalStorage(myLibrary);
 }
 
 function overwriteBookDisplay() {
@@ -177,6 +179,78 @@ function overwriteBookDisplay() {
 
 function removeForm(id) {
     bookDisplay.removeChild(document.querySelector("#" + id));
+}
+
+
+
+
+// Functions related to localStorage
+function saveToLocalStorage(library) {
+    if (storageAvailable("localStorage")) {
+        localStorage.setItem("myLibrary", JSON.stringify(library));
+        console.log("Saved library to localStorage");
+    } else {
+        console.log("localStorage not available");
+    }
+}
+
+function loadFromLocalStorage() {
+    if (storageAvailable("localStorage")) {
+        let localStorageLibrary = localStorage.getItem("myLibrary");
+        if (localStorageLibrary) {
+            console.log("Loaded localStorage library");
+            console.log(localStorageLibrary);
+            try {
+                let parsedLocalStorageLibrary = JSON.parse(localStorageLibrary);
+                let bookTypeLibrary = parsedLocalStorageLibrary.map(book => {
+                    return new Book (
+                        book.title,
+                        book.author,
+                        book.pages,
+                        book.read
+                    );
+                })
+                myLibrary = bookTypeLibrary;
+                console.log(myLibrary);
+                return true;
+            } catch (e) {
+                console.log("Error: " + e + "\n localStorage was not loaded");
+                return false;
+            }
+        } else {
+            console.log("localStorage library not present");
+            return false;
+        }
+    } else {
+        console.log("localStorage not available");
+        return false;
+    }
+}
+
+// Function from: https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
+function storageAvailable(type) {
+    var storage;
+    try {
+        storage = window[type];
+        var x = '__storage_test__';
+        storage.setItem(x, x);
+        storage.removeItem(x);
+        return true;
+    }
+    catch(e) {
+        return e instanceof DOMException && (
+            // everything except Firefox
+            e.code === 22 ||
+            // Firefox
+            e.code === 1014 ||
+            // test name field too, because code might not be present
+            // everything except Firefox
+            e.name === 'QuotaExceededError' ||
+            // Firefox
+            e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+            // acknowledge QuotaExceededError only if there's something already stored
+            (storage && storage.length !== 0);
+    }
 }
 
 
@@ -203,6 +277,10 @@ function testFormCreation() {
 
 
 // Code executed on load
+if (loadFromLocalStorage()) {
+    refresh();
+}
+
 newBookButton.addEventListener("click", () => {
     if (document.querySelector("form")) {
         console.log("A form is already present");
