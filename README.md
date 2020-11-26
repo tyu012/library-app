@@ -1,3 +1,5 @@
+# Library
+
 This project is an assignment for The Odin Project. The requirements can be viewed [here](https://www.theodinproject.com/courses/javascript/lessons/library).
 
 ## Functionality:
