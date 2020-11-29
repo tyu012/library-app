@@ -6,136 +6,141 @@ let numberOfFormsCreated = 0;
 
 
 
-function Book(title, author, pages, read) {
-    this.title = title;
-    this.author = author;
-    this.pages = pages;
-    this.read = read;
+class Book {
+    constructor(title, author, pages, read) {
+        this.title = title;
+        this.author = author;
+        this.pages = pages;
+        this.read = read;
+    }
+
+    infoAsString() {
+        const hasReadText = this.read ? "has read" : "not read yet";
+        return `${this.title} by ${this.author}, ${this.pages} pages, ${hasReadText}`;
+    }
+
+    infoAsList() {
+        let bookInfoList = document.createElement("ul");
+
+        let titleListItem = document.createElement("li");
+        titleListItem.textContent = `Title: ${this.title}`;
+        bookInfoList.appendChild(titleListItem);
+
+        let authorListItem = document.createElement("li");
+        authorListItem.textContent = `Author: ${this.author}`;
+        bookInfoList.appendChild(authorListItem);
+
+        let pagesListItem = document.createElement("li");
+        pagesListItem.textContent = `${this.pages} pages`;
+        bookInfoList.appendChild(pagesListItem);
+
+        let readListItem = document.createElement("li");
+        readListItem.textContent = this.read ? "Read" : "Not read";
+        bookInfoList.appendChild(readListItem);
+
+        let toggleReadUnreadItem = document.createElement("li");
+        let toggleReadUnreadButton = document.createElement("button");
+        toggleReadUnreadButton.textContent = "Read/Unread";
+        toggleReadUnreadButton.addEventListener("click", () => {
+            this.read = !this.read;
+            refresh();
+        });
+        toggleReadUnreadItem.appendChild(toggleReadUnreadButton);
+        bookInfoList.appendChild(toggleReadUnreadItem);
+
+        let deleteBookItem = document.createElement("li");
+        let deleteBookButton = document.createElement("button");
+        deleteBookButton.textContent = "Delete Book";
+        deleteBookButton.addEventListener("click", () => {
+            console.log("Deleted book: " + this.infoAsString());
+            myLibrary.splice(myLibrary.indexOf(this), 1);
+            refresh();
+        });
+        deleteBookItem.appendChild(deleteBookButton);
+        bookInfoList.appendChild(deleteBookItem);
+
+        bookInfoList.classList.add("book-info-list");
+
+        return bookInfoList;
+
+    }
 }
 
-Book.prototype.infoAsString = function() {
-    const hasReadText = this.read ? "has read" : "not read yet";
-    return `${this.title} by ${this.author}, ${this.pages} pages, ${hasReadText}`;
+
+
+
+class BookForm {
+    constructor(id) {
+        this.id = id;
+        this.createForm();
+    }
+    createForm() {
+        let form = document.createElement("form");
+        form.id = this.appendWithID("form");
+
+        form.appendChild(this.createField("text", "Title: ", this.appendWithID("book-form-title")));
+        form.appendChild(this.createField("text", "Author: ", this.appendWithID("book-form-author")));
+        form.appendChild(this.createField("text", "Pages: ", this.appendWithID("book-form-pages")));
+        form.appendChild(this.createField("checkbox", "I have read this book: ", this.appendWithID("book-form-read")));
+
+        let submitButton = document.createElement("input");
+        submitButton.type = "submit";
+        submitButton.id = "book-form-submit-" + this.id;
+        submitButton.value = "Submit";
+        form.appendChild(submitButton);
+
+        form.addEventListener("submit", e => {
+            e.preventDefault();
+            console.log("Submitted");
+            this.submitForm();
+            addBookToLibrary(this.book, myLibrary);
+        });
+
+        let cancelButton = document.createElement("button");
+        cancelButton.textContent = "Cancel";
+
+        this.form = form;
+    }
+    createField(type, labelText, name) {
+        let field = document.createElement("span");
+
+        let label = document.createElement("label");
+        label.setAttribute("for", name);
+        label.textContent = labelText;
+        label.id = `${name}-label`;
+        field.appendChild(label);
+
+        let input = document.createElement("input");
+        input.type = type;
+        input.id = name;
+        input.name = name;
+        field.appendChild(input);
+
+        field.appendChild(document.createElement("br"));
+
+        return field;
+    }
+    submitForm() {
+        const formData = new FormData(this.form);
+        const title = formData.get(this.appendWithID("book-form-title"));
+        const author = formData.get(this.appendWithID("book-form-author"));
+        const pages = parseInt(formData.get(this.appendWithID("book-form-pages")));
+        const read = formData.get(this.appendWithID("book-form-read")) === "on" ? true : false;
+
+        removeForm(this.form.id);
+
+        let newBook = new Book(title, author, pages, read);
+        console.log(newBook);
+        this.book = newBook;
+    }
+    appendWithID(stringWithoutUniqueID) {
+        return stringWithoutUniqueID + "-" + this.id;
+    }
 }
 
-Book.prototype.infoAsList = function() {
-    let bookInfoList = document.createElement("ul");
-
-    let titleListItem = document.createElement("li");
-    titleListItem.textContent = `Title: ${this.title}`;
-    bookInfoList.appendChild(titleListItem);
-
-    let authorListItem = document.createElement("li");
-    authorListItem.textContent = `Author: ${this.author}`;
-    bookInfoList.appendChild(authorListItem);
-
-    let pagesListItem = document.createElement("li");
-    pagesListItem.textContent = `${this.pages} pages`;
-    bookInfoList.appendChild(pagesListItem);
-
-    let readListItem = document.createElement("li");
-    readListItem.textContent = this.read ? "Read" : "Not read";
-    bookInfoList.appendChild(readListItem);
-
-    let toggleReadUnreadItem = document.createElement("li");
-    let toggleReadUnreadButton = document.createElement("button");
-    toggleReadUnreadButton.textContent = "Read/Unread";
-    toggleReadUnreadButton.addEventListener("click", () => {
-        this.read = !this.read;
-        refresh();
-    });
-    toggleReadUnreadItem.appendChild(toggleReadUnreadButton);
-    bookInfoList.appendChild(toggleReadUnreadItem);
-
-    let deleteBookItem = document.createElement("li");
-    let deleteBookButton = document.createElement("button");
-    deleteBookButton.textContent = "Delete Book";
-    deleteBookButton.addEventListener("click", () => {
-        console.log("Deleted book: " + this.infoAsString());
-        myLibrary.splice(myLibrary.indexOf(this), 1);
-        refresh();
-    });
-    deleteBookItem.appendChild(deleteBookButton);
-    bookInfoList.appendChild(deleteBookItem);
-
-    bookInfoList.classList.add("book-info-list");
-
-    return bookInfoList;
-}
 
 
 
-
-function BookForm(id) {
-    this.id = id;
-    this.createForm();
-}
-
-BookForm.prototype.createForm = function() {
-    let form = document.createElement("form");
-    form.id = this.appendWithID("form");
-
-    form.appendChild(this.createField("text", "Title: ", this.appendWithID("book-form-title")));
-    form.appendChild(this.createField("text", "Author: ", this.appendWithID("book-form-author")));
-    form.appendChild(this.createField("text", "Pages: ", this.appendWithID("book-form-pages")));
-    form.appendChild(this.createField("checkbox", "I have read this book: ", this.appendWithID("book-form-read")));
-    
-    let submitButton = document.createElement("input");
-    submitButton.type = "submit";
-    submitButton.id = "book-form-submit-" + this.id;
-    submitButton.value = "Submit";
-    form.appendChild(submitButton);
-
-    form.addEventListener("submit", e => {
-        e.preventDefault();
-        console.log("Submitted");
-        this.submitForm();
-        addBookToLibrary(this.book, myLibrary);
-    })
-    
-    let cancelButton = document.createElement("button");
-    cancelButton.textContent = "Cancel";
-
-    this.form = form;
-}
-
-BookForm.prototype.createField = function(type, labelText, name) {
-    let field = document.createElement("span");
-    
-    let label = document.createElement("label");
-    label.setAttribute("for", name);
-    label.textContent = labelText;
-    label.id = `${name}-label`;
-    field.appendChild(label);
-
-    let input = document.createElement("input");
-    input.type = type;
-    input.id = name;
-    input.name = name;
-    field.appendChild(input);
-
-    field.appendChild(document.createElement("br"));
-
-    return field;
-}
-
-BookForm.prototype.submitForm = function() {
-    const formData = new FormData(this.form);
-    const title = formData.get(this.appendWithID("book-form-title"));
-    const author = formData.get(this.appendWithID("book-form-author"));
-    const pages = parseInt(formData.get(this.appendWithID("book-form-pages")));
-    const read = formData.get(this.appendWithID("book-form-read")) === "on" ? true : false;
-
-    removeForm(this.form.id);
-    
-    let newBook = new Book(title, author, pages, read);
-    console.log(newBook);
-    this.book = newBook;
-}
-
-BookForm.prototype.appendWithID = function(stringWithoutUniqueID) {
-    return stringWithoutUniqueID + "-" + this.id;
-}
 
 
 
